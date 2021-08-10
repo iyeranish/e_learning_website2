@@ -1,7 +1,22 @@
 <%- include('../partials/header') %> 
+<div class="container row d-flex m-auto" >
 <% for(let course of courses){ %>
-<h2><%=course.title %></h2>
-<p><%= course.description %></p>
-<h4><%= course.tutor %></h4>
-<% } %>
+<div class="col-md-3 col-sm-6 ">
+<div class="card" style="width: 18rem;">
+    <div class="card-body">
+      <h5 class="card-title"><%=course.title %></h5>
+      <h6 class="card-subtitle mb-2 text-muted"><%= course.tutor %></h6>
+      <p class="card-text"><%= course.description %></p>
+      <a href="#" class="card-link">Register</a>
+      <a href="classes/<%=course._id%>" class="card-link">View More</a>
+    </div>
+  </div>
+  <br>
+</div>
+  <% } %>
+</div>
 <%- include('../partials/footer') %></p>
+
+
+
+

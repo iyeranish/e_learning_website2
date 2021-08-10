@@ -10,7 +10,7 @@ mongoose.connect('mongodb://localhost:27017/e_learning', {
   useFindAndModify: false,
 });
 
-app.use(bodyParser.urlencoded({ extended: true }));
+express.urlencoded({ extended: true });
 
 app.set('view engine', 'ejs');
 
@@ -23,8 +23,14 @@ app.get('/classes', async function (req, res) {
   res.render('courses/index', { courses });
 });
 
-app.get('/class/:id', function (req, res) {
-  res.send('hello');
+app.get('/classes/:id', function (req, res) {
+  Course.findById(req.params.id, function (err, course) {
+    if (err) {
+      console.log(err);
+    } else {
+      res.render('courses/show', { course });
+    }
+  });
 });
 
 app.get('/login', function (req, res) {});
