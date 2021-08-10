@@ -1,0 +1,7 @@
+<%- include('../partials/header') %> 
+<% for(let course of courses){ %>
+<h2><%=course.title %></h2>
+<p><%= course.description %></p>
+<h4><%= course.tutor %></h4>
+<% } %>
+<%- include('../partials/footer') %></p>
