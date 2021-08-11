@@ -1,8 +1,9 @@
-<%- include('../partials/header') %> 
+<% layout('./layout/boilerplate') -%>
 <div class="container row d-flex m-auto" >
+  <a href="/classes/new">Add a Course</a>
 <% for(let course of courses){ %>
-<div class="col-md-3 col-sm-6 ">
-<div class="card" style="width: 18rem;">
+<div class="col-md-6 col-lg-4 col-xl-3 col-sm-12 ">
+<div class="card course-card" >
     <div class="card-body">
       <h5 class="card-title"><%=course.title %></h5>
       <h6 class="card-subtitle mb-2 text-muted"><%= course.tutor %></h6>
@@ -15,7 +16,6 @@
 </div>
   <% } %>
 </div>
-<%- include('../partials/footer') %></p>
 
 
 
