@@ -20,7 +20,7 @@ const sample = array => array[Math.floor(Math.random() * array.length)];
 
 const seed = async () => {
   await CourseModel.deleteMany();
-  await LessonModel.deletaMany();
+  await LessonModel.deleteMany();
   const lesson=LessonModel({
     title:'Introduction',
     lessonUrl:'https://docs.google.com/document/d/1du1-y2nkU-7yntTTq_Ltu6-KZZkSebsXl39YVYiKILQ/edit?usp=sharing'

@@ -35,7 +35,11 @@
                                 </div>
                                 <div class="modal-body">
                                     <form action="/classes/<%=course._id %>/lessons" method="POST" id="new-lesson">
-
+                                        
+                                        <div class="form-floating mb-3">
+                                            <input type="text" class="form-control" id="floatingPassword" name="lesson[previousLesson]">
+                                            <label for="floatingPassword">Previous Lesson Title</label>
+                                          </div>
                                         <div class="form-floating mb-3">
                                             <input type="text" class="form-control" id="floatingInput" name="lesson[title]">
                                             <label for="floatingInput">Title</label>
@@ -61,7 +65,7 @@
 </div>
 
 <div class="row mt-3">
-    <div class="col-6">
+    <div class="col-4">
         <table class=" table table-bordered">
             <tr>
                 <th>No.</th>
@@ -71,7 +75,12 @@
             <% for (let lesson of course.lessons){ %>
                 <tr>
                     <td><%=  count %></td>
-                    <td><a href="<%= lesson.lessonUrl%>" target="_blank"><%=lesson.title %></a></td>
+                    <td><a href="<%= lesson.lessonUrl%>" target="_blank"><%=lesson.title %></a> 
+                        <form action="/classes/<%= course._id %>/lessons/<%= lesson._id %>?_method=Delete" method="post"  class="d-inline">
+                            <button class="btn btn-danger btn-sm" style="float:right;"><i class="fa fa-trash"></i></button>
+                        </form>
+                    </td>
+                        
                 </tr> 
                 <% count+=1 %> 
                 <% } %>  
