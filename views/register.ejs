@@ -1,9 +1,180 @@
 <% layout('./layout/boilerplate') -%>
+<div>
+  <div class="container py-5 h-100">
+    <div class="row d-flex justify-content-center align-items-center h-100">
+      <div class="col">
+        <div class="card card-registration my-4">
+          <div class="row g-0">
+            <div class="col-xl-6 d-none d-xl-block">
+              <img
+                src="https://mdbootstrap.com/img/Photos/new-templates/bootstrap-registration/img4.jpg"
+                alt="Sample photo"
+                class="img-fluid"
+                style="
+                  border-top-left-radius: 0.25rem;
+                  border-bottom-left-radius: 0.25rem;
+                "
+              />
+            </div>
 
-<h1>Sign Up!</h1>
+            <div class="col-xl-6">
+              <div class="card-body p-md-5 text-black">
+                <h3 class="mb-5 text-uppercase">Registration form</h3>
 
-<form action="/register" method="POST">
-  <input type="text" name="username" placeholder="username" />
-  <input type="password" name="password" placeholder="password" />
-  <button>Sign Up</button>
-</form>
+                <form action="/register" method="POST">
+                  <div class="form-outline mb-4">
+                    <select class="select" name="type">
+                      <option value="student">Student</option>
+                      <option value="tutor">Tutor</option>
+                    </select>
+                  </div>
+
+                  <div class="row">
+                    <div class="col-md-6 mb-4">
+                      <div class="form-outline">
+                        <input
+                          type="text"
+                          id="form3Example1m"
+                          class="form-control form-control-lg"
+                          name="first_name"
+                        />
+                        <label class="form-label" for="form3Example1m"
+                          >First name</label
+                        >
+                      </div>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                      <div class="form-outline">
+                        <input
+                          type="text"
+                          id="form3Example1n"
+                          class="form-control form-control-lg"
+                          name="last_name"
+                        />
+                        <label class="form-label" for="form3Example1n"
+                          >Last name</label
+                        >
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <input
+                      class="form-control form-control-lg"
+                      type="email"
+                      name="email"
+                    />
+                    <label class="form-label">Email</label>
+                  </div>
+
+                  <div class="form-check form-check-inline mb-0 me-4">
+                    <input
+                      class="form-check-input"
+                      type="radio"
+                      name="gender"
+                      value="male"
+                    />
+                    <label class="form-check-label">Male</label>
+                  </div>
+                  <div class="form-check form-check-inline mb-0 me-4">
+                    <input
+                      class="form-check-input"
+                      type="radio"
+                      name="gender"
+                      value="female"
+                    />
+                    <label class="form-check-label">Female</label>
+                  </div>
+                  <div class="form-check form-check-inline mb-0 me-4">
+                    <input
+                      class="form-check-input"
+                      type="radio"
+                      name="gender"
+                      value="other"
+                    />
+                    <label class="form-check-label">Other</label>
+                  </div>
+                  <div>
+                    <input
+                      class="form-control form-control-lg"
+                      type="text"
+                      name="street_address"
+                    />
+                    <label class="form-label">Address</label>
+                  </div>
+                  <div class="row">
+                    <div class="col-md-6 mb-4">
+                      <div>
+                        <input
+                          class="form-control form-control-lg"
+                          type="text"
+                          name="state"
+                        />
+                        <label class="form-label">State </label>
+                      </div>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                      <div>
+                        <input
+                          class="form-control form-control-lg"
+                          type="text"
+                          name="city"
+                        />
+                        <label class="form-label">City</label>
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <input
+                      style="max-width: 200px"
+                      class="form-control"
+                      type="text"
+                      name="pincode"
+                    />
+                    <label class="form-label">Pincode</label>
+                  </div>
+                  <div class="form-outline">
+                    <input
+                      style="max-width: 287px"
+                      class="form-control form-control-lg"
+                      type="text"
+                      name="username"
+                    />
+                    <label class="form-label">Username</label>
+                  </div>
+                  <br />
+                  <div class="row">
+                    <div class="col-md-6 mb-3">
+                      <div class="form-outline">
+                        <input
+                          class="form-control form-control-lg"
+                          type="password"
+                          name="password"
+                        />
+                        <label class="form-label">Password</label>
+                      </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                      <div class="form-outline">
+                        <input
+                          class="form-control form-control-lg"
+                          type="password"
+                          name="password2"
+                        />
+                        <label class="form-label">Confirm Password</label>
+                      </div>
+                    </div>
+                  </div>
+                  <input
+                    class="btn btn-primary mb-3"
+                    type="submit"
+                    value="Sign In!"
+                  />
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -9,6 +9,10 @@ const LessonModel = require('./models/lessons');
 var passport = require('passport');
 var LocalStrategy = require('passport-local');
 var User = require('./models/user');
+var Student = require('./models/student');
+var Tutor = require('./models/tutor');
+
+const { body, validationResult } = require('express-validator');
 
 mongoose.connect('mongodb://localhost:27017/e_learning', {
   useNewUrlParser: true,
@@ -25,6 +29,32 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(passport.initialize());
 app.use(passport.session());
 
+// passport.use(
+//   new LocalStrategy(
+//     {
+//       usernameField: 'email',
+//     },
+//     function (email, password, done) {
+//       User.findOne({ email }, function (err, user) {
+//         console.log(user);
+//         if (err) {
+//           console.log(err);
+//           return done(err);
+//         }
+//         if (!user) {
+//           console.log('Incorrect Email');
+//           return done(null, false, { message: 'Incorrect email.' });
+//         }
+//         if (req.body.password != password) {
+//           console.log(password, req.body.password);
+//           console.log('Incorrect Password');
+//           return done(null, false, { message: 'Incorrect password.' });
+//         }
+//         return done(null, user);
+//       });
+//     }
+//   )
+// );
 passport.use(new LocalStrategy(User.authenticate()));
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
@@ -106,19 +136,100 @@ app.get('/register', (req, res) => {
 });
 
 app.post('/register', function (req, res) {
-  User.register(
-    new User({ username: req.body.username }),
-    req.body.password,
-    function (err, user) {
-      if (err) {
-        res.redirect('/register');
-      } else {
-        passport.authenticate('local')(req, res, function () {
-          res.redirect('/classes');
-        });
-      }
+  var first_name = req.body.first_name;
+  var last_name = req.body.last_name;
+  var street_address = req.body.street_address;
+  var city = req.body.city;
+  var state = req.body.state;
+  var pincode = req.body.zip;
+  var email = req.body.email;
+  var username = req.body.username;
+  var password1 = req.body.password;
+  var password2 = req.body.password2;
+  var type = req.body.type;
+  var gender = req.body.gender;
+  var username = req.body.username;
+
+  // Form Validation
+  // body('first_name', 'First name field is required').notEmpty();
+  // body('last_name', 'Last name field is required').notEmpty();
+  // body('email', 'Email field is required').notEmpty();
+  // body('email', 'Email must be a valid email address').isEmail();
+  // body('username', 'Username field is required').notEmpty();
+  // body('password', 'Password field is required').notEmpty();
+  // body('password2', 'Passwords do not match').equals(req.body.password);
+
+  // const errors = validationResult(req);
+
+  var Users = new User({
+    email: email,
+    username: username,
+    type: type,
+  });
+  User.register(Users, password1, function (err, user) {
+    if (err) {
+      console.log(err);
+    } else {
+      console.log('User Created');
     }
-  );
+  });
+
+  if (type == 'student') {
+    var Students = new Student({
+      first_name: first_name,
+      last_name: last_name,
+      gender: gender,
+      address: [
+        {
+          street_address: street_address,
+          city: city,
+          state: state,
+          pincode: pincode,
+        },
+      ],
+      email: email,
+      username: username,
+    })
+      .save()
+      .then(newStudent => {
+        console.log('New Student Created' + newStudent);
+      });
+    // Student.register(Students, function (err, student) {
+    //   if (err) {
+    //     console.log(err);
+    //   } else {
+    //     console.log('Student registered');
+    //   }
+    // });
+  } else {
+    var Tutors = new Tutor({
+      first_name: first_name,
+      last_name: last_name,
+      gender: gender,
+      address: [
+        {
+          street_address: street_address,
+          city: city,
+          state: state,
+          pincode: pincode,
+        },
+      ],
+      email: email,
+      username: username,
+    })
+      .save()
+      .then(newTutor => {
+        console.log('New Tutor Created' + newTutor);
+      });
+    // Tutor.register(Users, Tutors, function (err, student) {
+    //   if (err) {
+    //     console.log(err);
+    //   } else {
+    //     console.log('Tutor registered');
+    //   }
+    // });
+  }
+  res.redirect('/login');
 });
 
 app.get('/login', (req, res) => {
