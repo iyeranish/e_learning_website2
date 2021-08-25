@@ -9,15 +9,19 @@ const LessonModel = require('./models/lessons');
 var passport = require('passport');
 var LocalStrategy = require('passport-local');
 var User = require('./models/user');
-var Student = require('./models/student');
-var Tutor = require('./models/tutor');
+var StudentModel = require('./models/student');
+var TutorModel = require('./models/tutor');
+var flash = require('connect-flash');
 
 //
-const catchAsync=require('./utils/catchAsync')
-const {validateCourse,validateLesson, validateUser}=require('./middleware')
-const adminModel=require('./models/admin')
+const catchAsync = require('./utils/catchAsync');
+const {
+  validateCourse,
+  validateLesson,
+  validateUser,
+} = require('./middleware');
+const adminModel = require('./models/admin');
 
-const { body, validationResult } = require('express-validator');
 const AppError = require('./utils/appError');
 
 mongoose.connect('mongodb://localhost:27017/e_learning', {
@@ -32,128 +36,162 @@ app.set('view engine', 'ejs');
 app.engine('ejs', ejsMate);
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.use(flash());
+
+app.use(
+  require('express-session')({
+    secret: 'Please run',
+    resave: false,
+    saveUninitialized: false,
+  })
+);
+
 app.use(passport.initialize());
 app.use(passport.session());
 
-// passport.use(
-//   new LocalStrategy(
-//     {
-//       usernameField: 'email',
-//     },
-//     function (email, password, done) {
-//       User.findOne({ email }, function (err, user) {
-//         console.log(user);
-//         if (err) {
-//           console.log(err);
-//           return done(err);
-//         }
-//         if (!user) {
-//           console.log('Incorrect Email');
-//           return done(null, false, { message: 'Incorrect email.' });
-//         }
-//         if (req.body.password != password) {
-//           console.log(password, req.body.password);
-//           console.log('Incorrect Password');
-//           return done(null, false, { message: 'Incorrect password.' });
-//         }
-//         return done(null, user);
-//       });
-//     }
-//   )
-// );
 passport.use(new LocalStrategy(User.authenticate()));
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
+
+app.use(function (req, res, next) {
+  res.locals.currentUser = req.user;
+  res.locals.error = req.flash('error');
+  res.locals.success = req.flash('success');
+  next();
+});
 
 app.get('/', (req, res) => {
   res.render('landing');
 });
 
-app.get('/classes', catchAsync(async function (req, res) {
-  const courses = await CourseModel.find();
-  res.render('courses/index', { courses });
-}));
+app.get(
+  '/classes',
+  catchAsync(async function (req, res) {
+    const courses = await CourseModel.find();
+    res.render('courses/index', { courses });
+  })
+);
 
 app.get('/classes/new', (req, res) => {
   res.render('courses/new');
 });
 
-app.post('/classes',validateCourse, catchAsync(async (req, res) => {
-  const course = new CourseModel(req.body.course);
-  await course.save();
-  res.redirect('/classes');
-}));
-
+app.post(
+  '/classes',
+  validateCourse,
+  catchAsync(async (req, res) => {
+    const course = new CourseModel(req.body.course);
+    await course.save();
+    res.redirect('/classes');
+  })
+);
 
 //
-app.get('/classes/:id', catchAsync(async function (req, res) {
-  const course = await CourseModel.findById(req.params.id).populate('lessons');
-  if (!course){
-    return next(new AppError(404,'Class not found'))
-  }
-  res.render('courses/show', { course });
-}));
-
-app.post('/classes/:id/lessons',validateLesson, catchAsync(async (req, res) => {
-  const course = await CourseModel.findById(req.params.id).populate('lessons');
-  if (!course) {
-    res.redirect('/classes');
-    return;
-  }
-  const { previousLesson = null, title, lessonUrl } = req.body.lesson;
-  const lesson = LessonModel({ title, lessonUrl });
-  await lesson.save();
-  let i = 0;
-  if (previousLesson) {
-    for (let temp of course.lessons) {
-      console.log(temp.title);
-      if (temp.title === previousLesson) {
-        break;
-      }
-      i += 1;
+app.get(
+  '/classes/:id',
+  catchAsync(async function (req, res) {
+    const course = await CourseModel.findById(req.params.id).populate(
+      'lessons'
+    );
+    if (!course) {
+      return next(new AppError(404, 'Class not found'));
     }
-    course.lessons.splice(i + 1, 0, lesson);
-    await course.save();
-  } else {
-    await course.lessons.push(lesson);
-    await course.save();
-  }
+    res.render('courses/show', { course });
+  })
+);
 
-  res.redirect(`/classes/${req.params.id}`);
-}));
+app.post(
+  '/classes/:id/lessons',
+  validateLesson,
+  catchAsync(async (req, res) => {
+    const course = await CourseModel.findById(req.params.id).populate(
+      'lessons'
+    );
+    if (!course) {
+      res.redirect('/classes');
+      return;
+    }
+    const { previousLesson = null, title, lessonUrl } = req.body.lesson;
+    const lesson = LessonModel({ title, lessonUrl });
+    await lesson.save();
+    let i = 0;
+    if (previousLesson) {
+      for (let temp of course.lessons) {
+        console.log(temp.title);
+        if (temp.title === previousLesson) {
+          break;
+        }
+        i += 1;
+      }
+      course.lessons.splice(i + 1, 0, lesson);
+      await course.save();
+    } else {
+      await course.lessons.push(lesson);
+      await course.save();
+    }
 
-app.delete('/classes/:id/lessons/:lessonId', catchAsync(async (req, res) => {
-  const course = await CourseModel.findById(req.params.id);
-  if (!course) {
+    res.redirect(`/classes/${req.params.id}`);
+  })
+);
+
+app.delete(
+  '/classes/:id/lessons/:lessonId',
+  catchAsync(async (req, res) => {
+    const course = await CourseModel.findById(req.params.id);
+    if (!course) {
+      res.redirect('/classes');
+      return;
+    }
+    await course.lessons.pull({ _id: req.params.lessonId });
+    await LessonModel.findByIdAndDelete(req.params.lessonId);
+    await course.save();
+    res.redirect(`/classes/${req.params.id}`);
+  })
+);
+
+app.delete(
+  '/classes/:id',
+  catchAsync(async (req, res) => {
+    await CourseModel.findByIdAndDelete(req.params.id);
     res.redirect('/classes');
-    return;
-  }
-  await course.lessons.pull({ _id: req.params.lessonId });
-  await LessonModel.findByIdAndDelete(req.params.lessonId);
-  await course.save();
-  res.redirect(`/classes/${req.params.id}`);
-}));
+  })
+);
 
-app.delete('/classes/:id', catchAsync(async (req, res) => {
-  await CourseModel.findByIdAndDelete(req.params.id);
-  res.redirect('/classes');
-}));
+//POST AUTHENTICATION ROUTES
+
+app.get(
+  '/students/classes',
+  catchAsync(async function (req, res) {
+    const student = await StudentModel.findOne({
+      username: res.locals.currentUser.username,
+    });
+    res.render('students/classes', { student });
+  })
+);
+
+app.get(
+  '/tutors/classes',
+  catchAsync(async function (req, res) {
+    const tutor = await TutorModel.findOne({
+      username: res.locals.currentUser.username,
+    });
+    res.render('tutors/classes', { tutor });
+  })
+);
 
 // AUTHENTICATION ROUTES
 
 app.get('/register', (req, res) => {
-    res.render('register');
+  res.render('register');
 });
 
-app.use('/register',async(req,res,next)=>{
-  const {usernames}=await adminModel.findOne({})
-  req.usernames=usernames
+app.use('/register', async (req, res, next) => {
+  const { usernames } = await adminModel.findOne({});
+  req.usernames = usernames;
   next();
-})
+});
 
-
-
-app.post('/register',validateUser,async  function (req, res) {
+app.post('/register', validateUser, async function (req, res) {
   var first_name = req.body.user.first_name;
   var last_name = req.body.user.last_name;
   var street_address = req.body.user.street_address;
@@ -167,17 +205,6 @@ app.post('/register',validateUser,async  function (req, res) {
   var type = req.body.user.type;
   var gender = req.body.user.gender;
   var username = req.body.user.username;
-
-  // Form Validation
-  // body('first_name', 'First name field is required').notEmpty();
-  // body('last_name', 'Last name field is required').notEmpty();
-  // body('email', 'Email field is required').notEmpty();
-  // body('email', 'Email must be a valid email address').isEmail();
-  // body('username', 'Username field is required').notEmpty();
-  // body('password', 'Password field is required').notEmpty();
-  // body('password2', 'Passwords do not match').equals(req.body.password);
-
-  // const errors = validationResult(req);
 
   var Users = new User({
     email: email,
@@ -212,13 +239,6 @@ app.post('/register',validateUser,async  function (req, res) {
       .then(newStudent => {
         console.log('New Student Created' + newStudent);
       });
-    // Student.register(Students, function (err, student) {
-    //   if (err) {
-    //     console.log(err);
-    //   } else {
-    //     console.log('Student registered');
-    //   }
-    // });
   } else {
     var Tutors = new Tutor({
       first_name: first_name,
@@ -239,17 +259,10 @@ app.post('/register',validateUser,async  function (req, res) {
       .then(newTutor => {
         console.log('New Tutor Created' + newTutor);
       });
-    // Tutor.register(Users, Tutors, function (err, student) {
-    //   if (err) {
-    //     console.log(err);
-    //   } else {
-    //     console.log('Tutor registered');
-    //   }
-    // });
   }
-  const admin=await adminModel.findOne({})
-  await admin.usernames.push(Users.username)
-  await admin.save()
+  const admin = await adminModel.findOne({});
+  await admin.usernames.push(Users.username);
+  await admin.save();
   res.redirect('/login');
 });
 
@@ -261,32 +274,31 @@ app.post(
   '/login',
   passport.authenticate('local', { failureRedirect: '/login' }),
   function (req, res) {
-    res.redirect('/classes');
+    var usertype = req.user.type;
+    res.redirect('/' + usertype + 's/classes');
   }
 );
 
 app.get('/logout', (req, res) => {
   req.logout();
+  req.flash('success', 'You have logged out');
   res.redirect('/');
 });
 
-
 //
 
-app.use('*',(req,res,next)=>{
-  return next(new AppError(404,'Page not found'))
-})
+app.use('*', (req, res, next) => {
+  return next(new AppError(404, 'Page not found'));
+});
 
-app.use((err,req,res,next)=>{
-  const {status=500}=err
-  if(!err.message){
-    err.message="Something went wrong"
+app.use((err, req, res, next) => {
+  const { status = 500 } = err;
+  if (!err.message) {
+    err.message = 'Something went wrong';
   }
-  res.status(status).render('error',{err})
-})
-
+  res.status(status).render('error', { err });
+});
 
 app.listen(3000, function () {
   console.log('The website has started');
-
 });
