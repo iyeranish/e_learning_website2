@@ -23,7 +23,7 @@
 
                 <form action="/register" method="POST">
                   <div class="form-outline mb-4">
-                    <select class="select" name="type">
+                    <select class="select" name="user[type]">
                       <option value="student">Student</option>
                       <option value="tutor">Tutor</option>
                     </select>
@@ -36,7 +36,7 @@
                           type="text"
                           id="form3Example1m"
                           class="form-control form-control-lg"
-                          name="first_name"
+                          name="user[first_name]"
                         />
                         <label class="form-label" for="form3Example1m"
                           >First name</label
@@ -49,7 +49,7 @@
                           type="text"
                           id="form3Example1n"
                           class="form-control form-control-lg"
-                          name="last_name"
+                          name="user[last_name]"
                         />
                         <label class="form-label" for="form3Example1n"
                           >Last name</label
@@ -61,7 +61,7 @@
                     <input
                       class="form-control form-control-lg"
                       type="email"
-                      name="email"
+                      name="user[email]"
                     />
                     <label class="form-label">Email</label>
                   </div>
@@ -70,7 +70,7 @@
                     <input
                       class="form-check-input"
                       type="radio"
-                      name="gender"
+                      name="user[gender]"
                       value="male"
                     />
                     <label class="form-check-label">Male</label>
@@ -79,7 +79,7 @@
                     <input
                       class="form-check-input"
                       type="radio"
-                      name="gender"
+                      name="user[gender]"
                       value="female"
                     />
                     <label class="form-check-label">Female</label>
@@ -88,7 +88,7 @@
                     <input
                       class="form-check-input"
                       type="radio"
-                      name="gender"
+                      name="user[gender]"
                       value="other"
                     />
                     <label class="form-check-label">Other</label>
@@ -97,7 +97,7 @@
                     <input
                       class="form-control form-control-lg"
                       type="text"
-                      name="street_address"
+                      name="user[street_address]"
                     />
                     <label class="form-label">Address</label>
                   </div>
@@ -107,7 +107,7 @@
                         <input
                           class="form-control form-control-lg"
                           type="text"
-                          name="state"
+                          name="user[state]"
                         />
                         <label class="form-label">State </label>
                       </div>
@@ -117,7 +117,7 @@
                         <input
                           class="form-control form-control-lg"
                           type="text"
-                          name="city"
+                          name="user[city]"
                         />
                         <label class="form-label">City</label>
                       </div>
@@ -128,7 +128,7 @@
                       style="max-width: 200px"
                       class="form-control"
                       type="text"
-                      name="pincode"
+                      name="user[pincode]"
                     />
                     <label class="form-label">Pincode</label>
                   </div>
@@ -137,7 +137,7 @@
                       style="max-width: 287px"
                       class="form-control form-control-lg"
                       type="text"
-                      name="username"
+                      name="user[username]"
                     />
                     <label class="form-label">Username</label>
                   </div>
@@ -148,7 +148,7 @@
                         <input
                           class="form-control form-control-lg"
                           type="password"
-                          name="password"
+                          name="user[password]"
                         />
                         <label class="form-label">Password</label>
                       </div>
@@ -158,7 +158,7 @@
                         <input
                           class="form-control form-control-lg"
                           type="password"
-                          name="password2"
+                          name="user[password2]"
                         />
                         <label class="form-label">Confirm Password</label>
                       </div>

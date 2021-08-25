@@ -12,7 +12,13 @@ var User = require('./models/user');
 var Student = require('./models/student');
 var Tutor = require('./models/tutor');
 
+//
+const catchAsync=require('./utils/catchAsync')
+const {validateCourse,validateLesson, validateUser}=require('./middleware')
+const adminModel=require('./models/admin')
+
 const { body, validationResult } = require('express-validator');
+const AppError = require('./utils/appError');
 
 mongoose.connect('mongodb://localhost:27017/e_learning', {
   useNewUrlParser: true,
@@ -63,27 +69,32 @@ app.get('/', (req, res) => {
   res.render('landing');
 });
 
-app.get('/classes', async function (req, res) {
+app.get('/classes', catchAsync(async function (req, res) {
   const courses = await CourseModel.find();
   res.render('courses/index', { courses });
-});
+}));
 
 app.get('/classes/new', (req, res) => {
   res.render('courses/new');
 });
 
-app.post('/classes', async (req, res) => {
+app.post('/classes',validateCourse, catchAsync(async (req, res) => {
   const course = new CourseModel(req.body.course);
   await course.save();
   res.redirect('/classes');
-});
+}));
 
-app.get('/classes/:id', async function (req, res) {
+
+//
+app.get('/classes/:id', catchAsync(async function (req, res) {
   const course = await CourseModel.findById(req.params.id).populate('lessons');
+  if (!course){
+    return next(new AppError(404,'Class not found'))
+  }
   res.render('courses/show', { course });
-});
+}));
 
-app.post('/classes/:id/lessons', async (req, res) => {
+app.post('/classes/:id/lessons',validateLesson, catchAsync(async (req, res) => {
   const course = await CourseModel.findById(req.params.id).populate('lessons');
   if (!course) {
     res.redirect('/classes');
@@ -101,7 +112,6 @@ app.post('/classes/:id/lessons', async (req, res) => {
       }
       i += 1;
     }
-    console.log(i);
     course.lessons.splice(i + 1, 0, lesson);
     await course.save();
   } else {
@@ -110,9 +120,9 @@ app.post('/classes/:id/lessons', async (req, res) => {
   }
 
   res.redirect(`/classes/${req.params.id}`);
-});
+}));
 
-app.delete('/classes/:id/lessons/:lessonId', async (req, res) => {
+app.delete('/classes/:id/lessons/:lessonId', catchAsync(async (req, res) => {
   const course = await CourseModel.findById(req.params.id);
   if (!course) {
     res.redirect('/classes');
@@ -122,33 +132,41 @@ app.delete('/classes/:id/lessons/:lessonId', async (req, res) => {
   await LessonModel.findByIdAndDelete(req.params.lessonId);
   await course.save();
   res.redirect(`/classes/${req.params.id}`);
-});
+}));
 
-app.delete('/classes/:id', async (req, res) => {
+app.delete('/classes/:id', catchAsync(async (req, res) => {
   await CourseModel.findByIdAndDelete(req.params.id);
   res.redirect('/classes');
-});
+}));
 
 // AUTHENTICATION ROUTES
 
 app.get('/register', (req, res) => {
-  res.render('register');
+    res.render('register');
 });
 
-app.post('/register', function (req, res) {
-  var first_name = req.body.first_name;
-  var last_name = req.body.last_name;
-  var street_address = req.body.street_address;
-  var city = req.body.city;
-  var state = req.body.state;
-  var pincode = req.body.zip;
-  var email = req.body.email;
-  var username = req.body.username;
-  var password1 = req.body.password;
-  var password2 = req.body.password2;
-  var type = req.body.type;
-  var gender = req.body.gender;
-  var username = req.body.username;
+app.use('/register',async(req,res,next)=>{
+  const {usernames}=await adminModel.findOne({})
+  req.usernames=usernames
+  next();
+})
+
+
+
+app.post('/register',validateUser,async  function (req, res) {
+  var first_name = req.body.user.first_name;
+  var last_name = req.body.user.last_name;
+  var street_address = req.body.user.street_address;
+  var city = req.body.user.city;
+  var state = req.body.user.state;
+  var pincode = req.body.user.zip;
+  var email = req.body.user.email;
+  var username = req.body.user.username;
+  var password1 = req.body.user.password;
+  var password2 = req.body.user.password2;
+  var type = req.body.user.type;
+  var gender = req.body.user.gender;
+  var username = req.body.user.username;
 
   // Form Validation
   // body('first_name', 'First name field is required').notEmpty();
@@ -229,6 +247,9 @@ app.post('/register', function (req, res) {
     //   }
     // });
   }
+  const admin=await adminModel.findOne({})
+  await admin.usernames.push(Users.username)
+  await admin.save()
   res.redirect('/login');
 });
 
@@ -249,6 +270,23 @@ app.get('/logout', (req, res) => {
   res.redirect('/');
 });
 
+
+//
+
+app.use('*',(req,res,next)=>{
+  return next(new AppError(404,'Page not found'))
+})
+
+app.use((err,req,res,next)=>{
+  const {status=500}=err
+  if(!err.message){
+    err.message="Something went wrong"
+  }
+  res.status(status).render('error',{err})
+})
+
+
 app.listen(3000, function () {
   console.log('The website has started');
+
 });

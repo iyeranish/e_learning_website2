@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const names = ['Romil Desai', 'Anish Iyer'];
 const titles = ['Google Data Analytics', 'Machine Learning', 'Web development'];
-
+const adminModel=require('../models/admin')
 mongoose.connect('mongodb://localhost:27017/e_learning', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
@@ -21,6 +21,10 @@ const sample = array => array[Math.floor(Math.random() * array.length)];
 const seed = async () => {
   await CourseModel.deleteMany();
   await LessonModel.deleteMany();
+  const admin=adminModel({
+    usernames:[]
+  })
+  await admin.save()
   const lesson=LessonModel({
     title:'Introduction',
     lessonUrl:'https://docs.google.com/document/d/1du1-y2nkU-7yntTTq_Ltu6-KZZkSebsXl39YVYiKILQ/edit?usp=sharing'
