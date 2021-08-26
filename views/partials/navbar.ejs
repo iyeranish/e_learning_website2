@@ -5,15 +5,19 @@
     </div>
     <div class="navbar-expand-sm">
       <ul class="nav navbar-nav navbar-right">
+        <% if(!currentUser){ %>  
         <li class="nav-item">
           <a class="nav-link" href="/login">Login</a>
         </li>
         <li class="nav-item">
           <a class="nav-link" href="/register">Sign Up</a>
         </li>
-        <li class="nav-item">
-          <a class="nav-link" href="/logout">Logout</a>
-        </li>
+        <% }else{ %>  
+          <li class="nav-item">
+            <a class="nav-link" href="/logout">Logout</a>
+          </li>
+        <% } %>  
+        
       </ul>
     </div>
   </div>

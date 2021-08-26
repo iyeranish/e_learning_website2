@@ -19,6 +19,7 @@ const {
   validateCourse,
   validateLesson,
   validateUser,
+  isLoggedIn
 } = require('./middleware');
 const adminModel = require('./models/admin');
 
@@ -53,13 +54,28 @@ passport.use(new LocalStrategy(User.authenticate()));
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
-app.use(function (req, res, next) {
+app.use(async function (req, res, next) {
   res.locals.currentUser = req.user;
+  if (req.user){
+    if(req.user.type=="tutor"){
+        const tutor = await TutorModel.findOne({
+          username: res.locals.currentUser.username,
+        });
+        req.tutor=tutor
+      }
+    else{
+      const student=await StudentModel.findOne({
+        username: res.locals.currentUser.username,
+      });
+      req.student=student
+    }
+  }
+  console.log(req.tutor)
+  console.log(req.user)
   res.locals.error = req.flash('error');
   res.locals.success = req.flash('success');
   next();
 });
-
 app.get('/', (req, res) => {
   res.render('landing');
 });
@@ -72,17 +88,24 @@ app.get(
   })
 );
 
-app.get('/classes/new', (req, res) => {
+app.get('/classes/new',isLoggedIn, (req, res) => {
   res.render('courses/new');
 });
 
 app.post(
   '/classes',
+  isLoggedIn,
   validateCourse,
   catchAsync(async (req, res) => {
+    console.log('User:-',req.user)
+    console.log('tutor:-',req.tutor)
     const course = new CourseModel(req.body.course);
+    course.tutor=req.tutor._id
     await course.save();
-    res.redirect('/classes');
+    const tutor=req.tutor
+    tutor.courses.push(course._id)
+    await tutor.save()
+    res.redirect('/tutors/classes');
   })
 );
 
@@ -100,8 +123,23 @@ app.get(
   })
 );
 
+app.post('/classes/:id',isLoggedIn,catchAsync(async (req,res)=>{
+  const student=req.student
+  student.enrolledCourses.push(req.params.id)
+  await student.save();
+  res.redirect('/students/classes')
+}))
+
+app.post('/classes/:id/unenroll',isLoggedIn,catchAsync(async (req,res)=>{
+  const student=req.student
+  student.enrolledCourses=student.enrolledCourses.filter((el)=>el!=req.params.id)
+  await student.save();
+  res.redirect('/students/classes')
+}))
+
 app.post(
   '/classes/:id/lessons',
+  isLoggedIn,
   validateLesson,
   catchAsync(async (req, res) => {
     const course = await CourseModel.findById(req.params.id).populate(
@@ -136,6 +174,8 @@ app.post(
 
 app.delete(
   '/classes/:id/lessons/:lessonId',
+  
+  isLoggedIn,
   catchAsync(async (req, res) => {
     const course = await CourseModel.findById(req.params.id);
     if (!course) {
@@ -151,6 +191,8 @@ app.delete(
 
 app.delete(
   '/classes/:id',
+  
+  isLoggedIn,
   catchAsync(async (req, res) => {
     await CourseModel.findByIdAndDelete(req.params.id);
     res.redirect('/classes');
@@ -161,20 +203,18 @@ app.delete(
 
 app.get(
   '/students/classes',
+  isLoggedIn,
   catchAsync(async function (req, res) {
-    const student = await StudentModel.findOne({
-      username: res.locals.currentUser.username,
-    });
+    const student =( await StudentModel.findOne({username: res.locals.currentUser.username,}).populate('enrolledCourses').populate('tutor'))
     res.render('students/classes', { student });
-  })
-);
+  }))
 
 app.get(
   '/tutors/classes',
+  isLoggedIn,
   catchAsync(async function (req, res) {
-    const tutor = await TutorModel.findOne({
-      username: res.locals.currentUser.username,
-    });
+    const tutor = await TutorModel.findOne({username: res.locals.currentUser.username,}).populate('courses');
+    console.log(tutor)
     res.render('tutors/classes', { tutor });
   })
 );
@@ -220,7 +260,7 @@ app.post('/register', validateUser, async function (req, res) {
   });
 
   if (type == 'student') {
-    var Students = new Student({
+    var Students = new StudentModel({
       first_name: first_name,
       last_name: last_name,
       gender: gender,
@@ -240,7 +280,7 @@ app.post('/register', validateUser, async function (req, res) {
         console.log('New Student Created' + newStudent);
       });
   } else {
-    var Tutors = new Tutor({
+    var Tutors = new TutorModel({
       first_name: first_name,
       last_name: last_name,
       gender: gender,
@@ -270,12 +310,15 @@ app.get('/login', (req, res) => {
   res.render('login');
 });
 
+
+//todo: remember to add failuerflash:true after implenting flash
 app.post(
   '/login',
   passport.authenticate('local', { failureRedirect: '/login' }),
-  function (req, res) {
+  async function (req, res) {
     var usertype = req.user.type;
-    res.redirect('/' + usertype + 's/classes');
+    const redirectLink=req.session.returnTo || '/'+usertype+'s/classes'
+    res.redirect(redirectLink);
   }
 );
 

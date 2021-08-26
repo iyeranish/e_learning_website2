@@ -1,1 +1,10 @@
+<% layout('./layout/boilerplate') -%>
+
 <h1><%=tutor.first_name %> <%=tutor.last_name%></h1>
+<!-- <p><%= tutor._id %> </p> -->
+<a href="/classes/new">Add a Course</a>
+<%   for(let course of tutor.courses){ %>
+    <p><%= course.title  %> </p>
+    <p><%= course.description %> </p>
+    <a href="/classes/<%=course._id%>" class="card-link">View More</a>
+<% } %> 

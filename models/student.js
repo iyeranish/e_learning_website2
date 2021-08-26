@@ -15,6 +15,12 @@ var StudentSchema = new mongoose.Schema({
   ],
   username: String,
   email: String,
+  enrolledCourses: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Course',
+    }
+  ]
 });
 
 StudentSchema.plugin(passportLocalMongoose);

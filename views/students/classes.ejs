@@ -1,1 +1,10 @@
+<% layout('./layout/boilerplate') -%>
+
+<a href="/classes">Enroll new Course</a>
 <h1><%=student.first_name %> <%=student.last_name%></h1>
+<%   for(let course of student.enrolledCourses){ %>
+    <p><%= course.title  %> </p>
+    <p><% course.tutor.first_name %> <% course.tutor.last_name %></p>
+    <p><%= course.description %> </p>
+    <a href="/classes/<%=course._id%>" class="card-link">View More</a>
+<% } %>

@@ -38,3 +38,11 @@ module.exports.validateUser=function(req,res,next){
         next();
     }
 }
+
+module.exports.isLoggedIn=function(req,res,next){
+        if(!req.isAuthenticated()){
+            req.session.returnTo=req.originalUrl
+            return res.redirect('/login')
+        }
+        next()
+}

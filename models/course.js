@@ -2,7 +2,10 @@ const mongoose = require('mongoose');
 const lessonModel=require('./lessons')
 const CourseSchema = new mongoose.Schema({
   title: String,
-  tutor: String,
+  tutor: {
+    type:mongoose.Schema.Types.ObjectId,
+    ref:'Tutor'
+  },
   description: String,
   lessons:[
     {

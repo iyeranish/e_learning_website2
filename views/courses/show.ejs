@@ -15,8 +15,12 @@
                         <button class="btn btn-danger">Delete</button>
                     </form>
     
-                    <form action="" method="POST" class="d-inline">
+                    <form action="/classes/<%=course._id %>" method="POST" class="d-inline">
                         <button class="btn btn-success">Enroll</button>
+                    </form>
+                    
+                    <form action="/classes/<%=course._id %>/unenroll" method="POST" class="d-inline">
+                        <button class="btn btn-success">UnEnroll</button>
                     </form>
 
 
