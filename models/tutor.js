@@ -1,6 +1,7 @@
 var mongoose = require('mongoose');
 var passportLocalMongoose = require('passport-local-mongoose');
 const CourseModel=require('./course')
+const AdminModel=require('./admin')
 var TutorSchema = new mongoose.Schema({
   first_name: String,
   last_name: String,
@@ -21,11 +22,17 @@ var TutorSchema = new mongoose.Schema({
 
 TutorSchema.post('findOneAndDelete', async(doc)=>{
   if(doc){
-      await CourseModel.deleteMany({
-          _id:{
-              $in:doc.reviews
-          }
+      // await CourseModel.deleteMany({
+      //     _id:{
+      //         $in:doc.reviews
+      //     }
+      // })
+      await UserModel.deleteOne({
+        username:doc.username
       })
+      const admin=await AdminModel.findOne({})
+      admin.usernames=admin.usernames.filter(el=>el!=doc.username)
+      await admin.save()
   }
 })
 

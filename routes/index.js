@@ -123,7 +123,6 @@ router.post(
     const admin = await adminModel.findOne({});
     await admin.usernames.push(Users.username);
     await admin.save();
-    res.redirect('/login');
   })
 );
 
@@ -135,7 +134,7 @@ router.get('/login', (req, res) => {
 router.post(
   '/login',
   passport.authenticate('local', {
-    failuerflash: true,
+    failureFlash:true,
     failureRedirect: '/login',
   }),
   async function (req, res) {
@@ -151,5 +150,7 @@ router.get('/logout', (req, res) => {
   req.flash('success', 'You have logged out');
   res.redirect('/');
 });
+
+
 
 module.exports = router;

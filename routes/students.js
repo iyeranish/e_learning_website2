@@ -8,11 +8,13 @@ const {
   validateLesson,
   validateUser,
   isLoggedIn,
+  isStudent,
 } = require('../middleware');
 
 router.get(
   '/classes',
   isLoggedIn,
+  isStudent,
   catchAsync(async function (req, res) {
     const student = await StudentModel.findOne({
       username: res.locals.currentUser.username,

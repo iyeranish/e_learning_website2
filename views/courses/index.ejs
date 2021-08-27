@@ -5,7 +5,7 @@
     <div class="card course-card">
       <div class="card-body">
         <h5 class="card-title"><%=course.title %></h5>
-        <h6 class="card-subtitle mb-2 text-muted"><%= course.tutor %></h6>
+        <h6 class="card-subtitle mb-2 text-muted"><%= course.tutor.first_name %> <%= course.tutor.last_name %></h6>
         <p class="card-text"><%= course.description %></p>
         <a href="classes/<%=course._id%>" class="card-link">View More</a>
       </div>

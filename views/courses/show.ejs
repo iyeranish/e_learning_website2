@@ -6,28 +6,30 @@
         <div class="card">
             <div class="card-body">
                 <h2 class="card-title"><%=course.title%></h2>
-                <h4 class="card-subtitle"><%=course.tutor %></h4>
+                <h4 class="card-subtitle"><%=course.tutor.first_name %> <%=course.tutor.last_name %></h4>
             
                 <p class="card-text"><%=course.description %></p>
                 
-
+                    <% if(isOwner){ %> 
                     <form action="/classes/<%=course._id %>?_method=DELETE" method="POST" class="d-inline">
                         <button class="btn btn-danger">Delete</button>
                     </form>
-    
-                    <form action="/classes/<%=course._id %>" method="POST" class="d-inline">
+                    <% }if(!alreadyEnrolled && !isTutor){ %> 
+                    <form action="/classes/<%=course._id %>/enroll" method="POST" class="d-inline">
                         <button class="btn btn-success">Enroll</button>
                     </form>
-                    
+                    <% }if(alreadyEnrolled){ %> 
                     <form action="/classes/<%=course._id %>/unenroll" method="POST" class="d-inline">
                         <button class="btn btn-success">UnEnroll</button>
                     </form>
+                    <% }if(isOwner){ %> 
 
 
                     <!-- Button trigger modal -->
                         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
                             Add new lesson
                         </button>
+                        <% } %> 
                         
                         <!-- Modal -->
                         <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
@@ -80,9 +82,11 @@
                 <tr>
                     <td><%=  count %></td>
                     <td><a href="<%= lesson.lessonUrl%>" target="_blank"><%=lesson.title %></a> 
+                        <% if(isOwner){ %> 
                         <form action="/classes/<%= course._id %>/lessons/<%= lesson._id %>?_method=Delete" method="post"  class="d-inline">
                             <button class="btn btn-danger btn-sm" style="float:right;"><i class="fa fa-trash"></i></button>
                         </form>
+                        <% } %> 
                     </td>
                         
                 </tr> 

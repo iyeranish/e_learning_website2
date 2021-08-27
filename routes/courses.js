@@ -9,6 +9,11 @@ const {
   validateLesson,
   validateUser,
   isLoggedIn,
+  isTutor,
+  isStudent,
+  isOwner,
+  checkIfAlreadyEnrolled,
+  checkIfEnrolled,
 } = require('../middleware');
 
 var CourseModel = require('../models/course');
@@ -19,28 +24,29 @@ const LessonModel = require('../models/lessons');
 router.get(
   '/',
   catchAsync(async function (req, res) {
-    const courses = await CourseModel.find();
+    const courses = await CourseModel.find().populate('tutor');
+    console.log(courses)
     res.render('courses/index', { courses });
   })
 );
 
-router.get('/new', isLoggedIn, (req, res) => {
+router.get('/new', isLoggedIn,isTutor, (req, res) => {
   res.render('courses/new');
 });
 
 router.post(
   '/',
   isLoggedIn,
+  isTutor,
   validateCourse,
   catchAsync(async (req, res) => {
-    console.log('User:-', req.user);
-    console.log('tutor:-', req.tutor);
     const course = new CourseModel(req.body.course);
     course.tutor = req.tutor._id;
     await course.save();
     const tutor = req.tutor;
     tutor.courses.push(course._id);
     await tutor.save();
+    req.flash('success','Successfullt added a new course')
     res.redirect('/tutors/classes');
   })
 );
@@ -50,25 +56,35 @@ router.post(
 router.get(
   '/:id',
   catchAsync(async function (req, res) {
-    const course = await CourseModel.findById(req.params.id).populate(
-      'lessons'
-    );
+    const course = await CourseModel.findById(req.params.id).populate('lessons').populate('tutor');
+    let isOwner=false
+    let alreadyEnrolled=false
+    let isTutor=false
     if (!course) {
       return next(new AppError(404, 'Class not found'));
     }
-    res.render('courses/show', { course });
+    if(req.tutor){
+      isTutor=true
+      isOwner= course.tutor._id.equals(req.tutor._id)
+    }else if(req.student){
+      alreadyEnrolled=req.student.enrolledCourses.includes(course._id)
+    }
+    res.render('courses/show', { course,isOwner,alreadyEnrolled,isTutor });
   })
 );
 
 //
 
 router.post(
-  '/:id',
+  '/:id/enroll',
   isLoggedIn,
+  isStudent,
+  checkIfAlreadyEnrolled,
   catchAsync(async (req, res) => {
     const student = req.student;
     student.enrolledCourses.push(req.params.id);
     await student.save();
+    req.flash('success','Successfullu enrolled to the course')
     res.redirect('/students/classes');
   })
 );
@@ -76,12 +92,15 @@ router.post(
 router.post(
   '/:id/unenroll',
   isLoggedIn,
+  isStudent,
+  checkIfEnrolled,
   catchAsync(async (req, res) => {
     const student = req.student;
     student.enrolledCourses = student.enrolledCourses.filter(
       el => el != req.params.id
     );
     await student.save();
+    req.flash('success','Successfully unenrolled from the course')
     res.redirect('/students/classes');
   })
 );
@@ -89,6 +108,8 @@ router.post(
 router.post(
   '/:id/lessons',
   isLoggedIn,
+  isTutor,
+  isOwner,
   validateLesson,
   catchAsync(async (req, res) => {
     const course = await CourseModel.findById(req.params.id).populate(
@@ -117,14 +138,16 @@ router.post(
       await course.save();
     }
 
+    req.flash('success','Successfully added a new lesson to the course')
     res.redirect(`/classes/${req.params.id}`);
   })
 );
 
 router.delete(
   '/:id/lessons/:lessonId',
-
   isLoggedIn,
+  isTutor,
+  isOwner,
   catchAsync(async (req, res) => {
     const course = await CourseModel.findById(req.params.id);
     if (!course) {
@@ -134,17 +157,20 @@ router.delete(
     await course.lessons.pull({ _id: req.params.lessonId });
     await LessonModel.findByIdAndDelete(req.params.lessonId);
     await course.save();
+    req.flash('success','Successfully deleted the lesson from the course')
     res.redirect(`/classes/${req.params.id}`);
   })
 );
 
 router.delete(
   '/:id',
-
   isLoggedIn,
+  isTutor,
+  isOwner,
   catchAsync(async (req, res) => {
     await CourseModel.findByIdAndDelete(req.params.id);
-    res.redirect('/classes');
+    req.flash('success','Successfully deleted the course')
+    res.redirect('/tutors/classes');
   })
 );
 
