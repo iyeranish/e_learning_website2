@@ -15,9 +15,41 @@
                         <button class="btn btn-danger">Delete</button>
                     </form>
                     <% }if(!alreadyEnrolled && !isTutor){ %> 
-                    <form action="/classes/<%=course._id %>/enroll" method="POST" class="d-inline">
+                    <!-- <form action="/classes/<%=course._id %>/enroll" method="POST" class="d-inline">
                         <button class="btn btn-success">Enroll</button>
-                    </form>
+                    </form> -->
+
+                        <!-- Button trigger modal -->
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#EnrollModal">
+                            Enroll
+                        </button>
+
+                        <!-- modal -->
+                        <div class="modal fade" id="EnrollModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="EnrollModalLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                <h5 class="modal-title" id="EnrollModalLabel">Enter Password</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <form action="/classes/<%=course._id %>/enroll" method="POST" id="password_form">
+                                        
+                                        <div class="form-floating mb-3">
+                                            <input type="text" class="form-control" id="floatingPassword" name="password">
+                                            <label for="floatingPassword">Password</label>
+                                          </div>
+                                      </form>
+                                </div>
+                                <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <button type="submit" class="btn btn-success" form="password_form" formaction="/classes/<%=course._id %>/enroll" formmethod="POST">Enroll</button>
+                                </div>
+                            </div>
+                            </div>
+                        </div>
+
+
                     <% }if(alreadyEnrolled){ %> 
                     <form action="/classes/<%=course._id %>/unenroll" method="POST" class="d-inline">
                         <button class="btn btn-success">UnEnroll</button>
@@ -28,6 +60,10 @@
                     <!-- Button trigger modal -->
                         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
                             Add new lesson
+                        </button>
+
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#EditModal">
+                            Edit Password
                         </button>
                         <% } %> 
                         
@@ -64,7 +100,34 @@
                             </div>
                         </div>
                     
-                    
+
+                        
+
+                        <!-- modal -->
+                        <div class="modal fade" id="EditModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="EditModalLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                <h5 class="modal-title" id="EditModalLabel">Edit Password</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <form action="/classes/<%=course._id %>/modifyPassword" method="POST" id="edit_password_form">
+                                        
+                                        <div class="form-floating mb-3">
+                                            <input type="text" class="form-control" id="floatingPassword" name="password">
+                                            <label for="floatingPassword">New Password</label>
+                                          </div>
+                                      </form>
+                                </div>
+                                <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <button type="submit" class="btn btn-success" form="edit_password_form" formaction="/classes/<%=course._id %>/modifyPassword" formmethod="POST">Save</button>
+                                </div>
+                            </div>
+                            </div>
+                        </div>
+
                 </div>
             </div>
     </div>
@@ -81,8 +144,11 @@
             <% for (let lesson of course.lessons){ %>
                 <tr>
                     <td><%=  count %></td>
-                    <td><a href="<%= lesson.lessonUrl%>" target="_blank"><%=lesson.title %></a> 
-                        <% if(isOwner){ %> 
+                    <% if(alreadyEnrolled || isOwner){ %> 
+                    <td><a href="<%= lesson.lessonUrl%>" target="_blank"><%=lesson.title %></a>
+                        <% }else{ %>
+                            <td><span><%=lesson.title %></span>
+                                <% }if(isOwner){ %> 
                         <form action="/classes/<%= course._id %>/lessons/<%= lesson._id %>?_method=Delete" method="post"  class="d-inline">
                             <button class="btn btn-danger btn-sm" style="float:right;"><i class="fa fa-trash"></i></button>
                         </form>

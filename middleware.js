@@ -7,7 +7,9 @@ module.exports.validateCourse=function(req,res,next){
     const {error}=courseSchema.validate(req.body)
     if (error){
         const msg=error.details.map(el=>el.message).join(',')
-        throw new AppError(401,msg)
+        // throw new AppError(401,msg)
+        req.flash('error',msg)
+        return res.redirect(req.session.previous_url)
     }
     else{
         next();
@@ -18,7 +20,9 @@ module.exports.validateLesson=function(req,res,next){
     const {error}=lessonSchema.validate(req.body)
     if (error){
         const msg=error.details.map(el=>el.message).join(',')
-        throw new AppError(401,msg)
+        // throw new AppError(401,msg)
+        req.flash('error',msg)
+        return res.redirect(req.session.previous_url)
     }else{
         next();
     }
@@ -27,15 +31,25 @@ module.exports.validateLesson=function(req,res,next){
 module.exports.validateUser=function(req,res,next){
 
     const {error}=userSchema.validate(req.body)
-    if (error){
+    // if (error){
+    //     const msg=error.details.map(el=>el.message).join(',')
+    //     throw new AppError(401,msg)
+    // }else if (req.body.user.password !== req.body.user.password2){
+    //     throw new AppError(401,"Passwords does not match")
+    // }else if(req.usernames.includes(req.body.user.username)){
+    //     throw new AppError(401,'Username already exist')
+    // }
+    if(error){
         const msg=error.details.map(el=>el.message).join(',')
-        throw new AppError(401,msg)
+        req.flash('error',msg)
+        res.status(401).redirect('/register')
     }else if (req.body.user.password !== req.body.user.password2){
-        throw new AppError(401,"Passwords does not match")
+        req.flash('error','Passwords does not match')
+        res.status(401).redirect('/register')
     }else if(req.usernames.includes(req.body.user.username)){
-        throw new AppError(401,'Username already exist')
-    } 
-    else{
+            req.flash('error','Username already exist')
+            res.status(401).redirect('/register')
+    }else{
         next();
     }
 }

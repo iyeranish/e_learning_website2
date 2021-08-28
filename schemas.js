@@ -26,6 +26,7 @@ const Joi = BaseJoi.extend(extension)
 module.exports.courseSchema=Joi.object({
     course:Joi.object({
         title:Joi.string().required().escapeHTML(),
+        password:Joi.string().required().escapeHTML(),
         description:Joi.string().required().escapeHTML()
     }).unknown().required()
 })

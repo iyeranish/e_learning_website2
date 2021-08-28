@@ -2,7 +2,7 @@ var express = require('express');
 var router = express.Router();
 var CourseModel = require('../models/course');
 var StudentModel = require('../models/student');
-
+const bcrypt=require('bcrypt')
 const catchAsync = require('../utils/catchAsync');
 const {
   validateCourse,
@@ -25,12 +25,12 @@ router.get(
   '/',
   catchAsync(async function (req, res) {
     const courses = await CourseModel.find().populate('tutor');
-    console.log(courses)
     res.render('courses/index', { courses });
   })
 );
 
 router.get('/new', isLoggedIn,isTutor, (req, res) => {
+  req.session.previous_url=req.originalUrl
   res.render('courses/new');
 });
 
@@ -69,11 +69,22 @@ router.get(
     }else if(req.student){
       alreadyEnrolled=req.student.enrolledCourses.includes(course._id)
     }
+    req.session.previous_url=req.originalUrl
     res.render('courses/show', { course,isOwner,alreadyEnrolled,isTutor });
   })
 );
 
-//
+// to edit course password
+
+router.post('/:id/modifyPassword',isLoggedIn,isTutor,isOwner,
+    catchAsync(async(req,res)=>{
+      const course = await CourseModel.findById(req.params.id)
+      const {password} = req.body
+      course.password=password
+      await course.save()
+      req.flash('success','Password has been successfully changed')
+      res.redirect(`/classes/${req.params.id}`);
+    }))
 
 router.post(
   '/:id/enroll',
@@ -81,11 +92,18 @@ router.post(
   isStudent,
   checkIfAlreadyEnrolled,
   catchAsync(async (req, res) => {
+    const course = await CourseModel.findById(req.params.id)
+    const {password} = req.body
+    const valid=await bcrypt.compare(password,course.password)
+    if(!valid){
+      req.flash('error','Password incorrect')
+      return res.redirect(`/classes/${req.params.id}`)
+    }
     const student = req.student;
     student.enrolledCourses.push(req.params.id);
     await student.save();
-    req.flash('success','Successfullu enrolled to the course')
-    res.redirect('/students/classes');
+    req.flash('success','Successfully enrolled to the course')
+    res.redirect(`/classes/${req.params.id}`);
   })
 );
 
@@ -101,7 +119,7 @@ router.post(
     );
     await student.save();
     req.flash('success','Successfully unenrolled from the course')
-    res.redirect('/students/classes');
+    res.redirect(`/classes/${req.params.id}`);
   })
 );
 
