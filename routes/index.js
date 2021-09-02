@@ -18,9 +18,13 @@ const {
 
 /* HOME PAGE */
 
-router.get('/', (req, res) => {
-  res.render('landing');
-});
+router.get(
+  '/',
+  catchAsync(async function (req, res) {
+    const courses = await CourseModel.find().limit(3);
+    res.render('landing', { courses });
+  })
+);
 
 router.get('/register', (req, res) => {
   res.render('register');
@@ -134,7 +138,7 @@ router.get('/login', (req, res) => {
 router.post(
   '/login',
   passport.authenticate('local', {
-    failureFlash:true,
+    failureFlash: true,
     failureRedirect: '/login',
   }),
   async function (req, res) {
@@ -150,7 +154,5 @@ router.get('/logout', (req, res) => {
   req.flash('success', 'You have logged out');
   res.redirect('/');
 });
-
-
 
 module.exports = router;

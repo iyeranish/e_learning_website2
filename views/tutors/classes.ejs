@@ -1,10 +1,40 @@
 <% layout('./layout/boilerplate') -%>
 
-<h1><%=tutor.first_name %> <%=tutor.last_name%></h1>
-<!-- <p><%= tutor._id %> </p> -->
-<a href="/classes/new">Add a Course</a>
-<%   for(let course of tutor.courses){ %>
-    <p><%= course.title  %> </p>
-    <p><%= course.description %> </p>
-    <a href="/classes/<%=course._id%>" class="card-link">View More</a>
-<% } %> 
+<!-- <h1></h1>
+<p><%= tutor._id %> </p> 
+
+
+    <p> </p>
+    <p> </p>
+    <a href="" class="card-link"></a>
+  -->
+<% if((tutor.courses.length == 0)){ %>
+<div class="container mt-5 mb-3">No courses</div>
+<%}else {%>
+<div class="container mt-5 mb-3">
+  <div class="row">
+    <% for(let course of tutor.courses){ %>
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-header">
+          <%=tutor.first_name %> <%=tutor.last_name%>
+        </div>
+        <div class="card-body">
+          <h5 class="card-title"><%= course.title %></h5>
+          <hr />
+          <p class="card-text"><%= course.description.substring(0,60)%>....</p>
+          <a
+            href="/classes/<%=course._id%>"
+            class="card-link"
+            style="text-decoration: none"
+            >View More</a
+          >
+        </div>
+      </div>
+    </div>
+    <% } %>
+  </div>
+  <br />
+  <a href="/classes/new" class="btn btn-primary">Add a Course</a>
+</div>
+<%}%>
