@@ -19,8 +19,12 @@ router.get(
     const student = await StudentModel.findOne({
       username: res.locals.currentUser.username,
     })
-      .populate('enrolledCourses')
-      .populate('tutor');
+      .populate({
+        path:'enrolledCourses',
+        populate:{
+            path:'tutor'
+        }
+    }).populate('tutor');
     res.render('students/classes', { student });
   })
 );

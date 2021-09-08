@@ -1,6 +1,6 @@
 <% layout('./layout/boilerplate') -%>
 
-<a href="/classes">Enroll new Course</a>
+<!-- <a href="/classes">Enroll new Course</a>
 <h1><%=student.first_name %> <%=student.last_name%></h1>
 
 <p></p>
@@ -51,4 +51,38 @@
     </div>
     <% } %>
   </div>
+</div> -->
+<div class="container mt-5 mb-3">
+<% if((student.enrolledCourses.length == 0)){ %>
+  <p>No courses</p>
+
+  <%}else {%>
+  <div class="container mt-5 mb-3">
+    <div class="row">
+      <% for(let course of student.enrolledCourses){ %>
+        <% console.log(course) %> 
+      <div class="col-md-4">
+        <div class="card">
+          <div class="card-header">
+            <%=course.tutor.first_name %> <%=course.tutor.last_name%>
+          </div>
+          <div class="card-body">
+            <h5 class="card-title"><%= course.title %></h5>
+            <hr />
+            <p class="card-text"><%= course.description.substring(0,60)%>....</p>
+            <a
+              href="/classes/<%=course._id%>"
+              class="card-link"
+              style="text-decoration: none"
+              >View More</a
+            >
+          </div>
+        </div>
+      </div>
+      <% } %>
+    </div>
+  </div>
+  <%}%>
+  <!-- <br />
+  <a href="/classes" class="btn btn-primary">Enroll to a Course</a> -->
 </div>

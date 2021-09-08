@@ -1,10 +1,19 @@
-<nav class="navbar navbar-dark bg-dark sticky-top">
+<!-- <nav class="navbar navbar-dark bg-dark sticky-top">
   <div class="container-fluid">
     <div class="navbar-header">
       <a class="navbar-brand" href="/">E-learning</a>
     </div>
     <div class="navbar-expand-sm">
-      <ul class="nav navbar-nav navbar-right">
+      <ul class="nav navbar-nav ">
+        <div class="navbar-nav">
+          <a class="nav-link" href="/classes">Explore</a>
+          <% if(currentUser){ %> 
+          <a class="nav-link " href="/<%= currentUser.type%>"+"s/courses">My Courses</a>
+          <% } %> 
+          
+          <a class="nav-link" href="/campgrounds/new">Add Campgrounds</a> -->
+        <!-- </div>
+        <div class="navbar-nav ms-auto">
         <% if(!currentUser){ %>
         <li class="nav-item">
           <a class="nav-link" href="/login">Login</a>
@@ -19,5 +28,37 @@
         <% } %>
       </ul>
     </div>
+    </div>
+  </div>
+</nav> -->
+<nav class="navbar sticky-top navbar-expand-lg navbar-dark bg-dark">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="/">E-learning</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+      <div class="navbar-nav">
+        <a class="nav-link" href="/classes">Explore</a>
+        <% if(currentUser){ %>
+          <% if(currentUser.type=="tutor"){ %> 
+          <a class="nav-link " href="/tutors/classes">My Courses</a>
+          <% }else{%>
+            <a class="nav-link " href="/students/classes">My Courses</a>
+          <% } %> 
+          <% if(currentUser.type=="tutor"){ %> 
+          <a class="nav-link" href="/classes/new">Add Course</a>
+          <% }} %> 
+      </div>
+      <div class="navbar-nav ms-auto">
+        <% if(!currentUser){  %> 
+        <a class="nav-link " href="/login">Log In</a>
+        <a class="nav-link" href="/register">Register</a>
+        <% }else{ %> 
+        <a class="nav-link" href="/logout">Log Out</a>
+        <% } %> 
+      </div>
+    </div>
   </div>
 </nav>
+
